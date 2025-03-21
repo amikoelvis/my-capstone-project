@@ -17,6 +17,9 @@ const Home = () => {
         isLoadingCategories,
         error,
         fetchCategories,
+        setSelectedCategory,
+        setDifficulty,
+        setNumQuestions,
     } = useQuizSettingsStore();
 
     const { fetchQuizQuestions, isLoading } = useQuizQuestionsStore();
@@ -45,20 +48,33 @@ const Home = () => {
 
             <Formik
                 initialValues={{
-                    selectedCategory: selectedCategory,
-                    difficulty: difficulty,
-                    numQuestions: numQuestions,
+                    selectedCategory: selectedCategory || "",
+                    difficulty: difficulty || "easy",
+                    numQuestions: numQuestions || 10,
                 }}
                 validationSchema={validationSchema}
                 onSubmit={async (values) => {
-                    await fetchQuizQuestions();
+                    // Update Zustand store before fetching questions
+                    setSelectedCategory(values.selectedCategory);
+                    setDifficulty(values.difficulty);
+                    setNumQuestions(values.numQuestions);
+                    await fetchQuizQuestions(); // Fetch questions based on updated store values
                     navigate("/quiz");
                 }}
             >
-                {({ isSubmitting }) => (
+                {({ values, setFieldValue, isSubmitting }) => (
                     <Form className="w-full max-w-md">
                         <label className="block mb-2 text-title font-bold font-Fran">Category:</label>
-                        <Field as="select" name="selectedCategory" className="w-full p-2 border rounded-md">
+                        <Field 
+                        as="select" 
+                        name="selectedCategory" 
+                        value={values.selectedCategory} // Controlled by Formik state
+                        className="w-full p-2 border rounded-md"
+                        onChange={(e) => {
+                            setFieldValue("selectedCategory", e.target.value); // Update Formik
+                            setSelectedCategory(e.target.value); // Update Zustand state
+                        }}
+                        >
                             <option value="">Select Category</option>
                             {categories.map((cat) => (
                                 <option key={cat.id} value={cat.id}>
@@ -69,7 +85,16 @@ const Home = () => {
                         <ErrorMessage name="selectedCategory" component="div" className="text-red-500" />
 
                         <label className="block mt-4 mb-2 text-title font-bold font-Fran">Difficulty:</label>
-                        <Field as="select" name="difficulty" className="w-full p-2 border rounded-md">
+                        <Field 
+                        as="select" 
+                        name="difficulty" 
+                        value={values.difficulty}
+                        onChange={(e) => {
+                        setFieldValue("difficulty", e.target.value);
+                        setDifficulty(e.target.value); // Update Zustand state
+                        }}
+                        className="w-full p-2 border rounded-md"
+                        >
                             <option value="easy">Easy</option>
                             <option value="medium">Medium</option>
                             <option value="hard">Hard</option>
@@ -77,7 +102,16 @@ const Home = () => {
                         <ErrorMessage name="difficulty" component="div" className="text-red-500" />
 
                         <label className="block mt-4 mb-2 text-title font-bold font-Fran">Number of Questions:</label>
-                        <Field type="number" name="numQuestions" className="w-full p-2 border rounded-md" />
+                        <Field 
+                        type="number" 
+                        name="numQuestions" 
+                        className="w-full p-2 border rounded-md" 
+                        value={values.numQuestions}
+                        onChange={(e) => {
+                            setFieldValue("numQuestions", e.target.value);
+                            setNumQuestions(Number(e.target.value)); // Update Zustand state
+                        }}
+                        />
                         <ErrorMessage name="numQuestions" component="div" className="text-red-500" />
 
                         <button
