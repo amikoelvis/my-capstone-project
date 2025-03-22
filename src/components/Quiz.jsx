@@ -1,6 +1,5 @@
 import { useQuizQuestionsStore } from "../store/quizQuestionsStore";
 import { useNavigate } from "react-router-dom";
-import Loader from "./Loader";
 
 const Quiz = () => {
     const navigate = useNavigate();
@@ -13,13 +12,8 @@ const Quiz = () => {
         updateScore,
         setSelectedAnswer,
         nextQuestion,
-        resetQuiz,
-        isLoading
+        resetQuiz
     } = useQuizQuestionsStore();
-
-    if (isLoading) {
-        return <Loader />;
-    }
 
     if (!questions.length) {
         navigate("/");
@@ -30,19 +24,21 @@ const Quiz = () => {
     const totalQuestions = questions.length;
 
     const handleAnswerSelection = (answer) => {
-        if (!isAnswered) {
+        if (!isAnswered) {  
             setSelectedAnswer(answer);
+    
             if (answer === currentQuestion.correct_answer) {
                 updateScore();
             }
         }
     };
+    
 
     const handleNextQuestion = () => {
         if (currentQuestionIndex < totalQuestions - 1) {
             nextQuestion();
         } else {
-            navigate("/results");
+            navigate("/score");
         }
     };
 

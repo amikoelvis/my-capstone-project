@@ -2,13 +2,17 @@ import { create } from "zustand";
 import { useQuizSettingsStore } from "./quizSettingsStore";
 
 export const useQuizQuestionsStore = create((set, get) => ({
-    questions: [],
+    questions: [], // Ensures it's never undefined
     isLoading: false,
     error: null,
     currentQuestionIndex: 0,
     selectedAnswer: null,
     isAnswered: false,
     score: 0,
+    correctAnswers: [],
+    incorrectAnswers: [],
+
+    setQuestions: (questions) => set({ questions }),
 
     fetchQuizQuestions: async () => {
         set({ isLoading: true, error: null, questions: [] });
@@ -37,39 +41,60 @@ export const useQuizQuestionsStore = create((set, get) => ({
     },
 
     setSelectedAnswer: (answer) => {
-        set((state) => ({
-            selectedAnswer: answer,
-            isAnswered: true,
-            score: answer === state.questions[state.currentQuestionIndex].correct_answer
-                ? state.score + 1
-                : state.score,
-        }));
-    },
+        set((state) => {
+            const isCorrect = answer === state.questions[state.currentQuestionIndex].correct_answer;
+            const currentQuestion = state.questions[state.currentQuestionIndex];
+    
+            return {
+                selectedAnswer: answer,
+                isAnswered: true,
+                score: isCorrect ? state.score + 1 : state.score,
+                correctAnswers: isCorrect
+                    ? [...state.correctAnswers, { ...currentQuestion, userAnswer: answer }] // ✅ Store correct answer with user's response
+                    : state.correctAnswers,
+                incorrectAnswers: !isCorrect
+                    ? [...state.incorrectAnswers, { ...currentQuestion, userAnswer: answer }] // ✅ Store incorrect answer with user's response
+                    : state.incorrectAnswers,
+            };
+        });
+    },    
+    
 
     nextQuestion: () => {
         set((state) => {
-            if (state.currentQuestionIndex < state.questions.length - 1) {
+            const isLastQuestion = state.currentQuestionIndex >= state.questions.length - 1;
+            
+            if (!isLastQuestion) {
                 return {
                     currentQuestionIndex: state.currentQuestionIndex + 1,
                     selectedAnswer: null,
                     isAnswered: false,
                 };
             }
+            
             return state;
         });
     },
+    
 
-    updateScore: () => {
-        set((state) => ({ score: state.score + 1 }));
-    },
+    /* updateScore: () => set((state) => ({
+        score: state.score + 1
+    })),   */
 
-    resetQuiz: () => {
-        set({ 
-            currentQuestionIndex: 0, 
-            selectedAnswer: null, 
-            isAnswered: false, 
-            score: 0, 
-            questions: [] 
+    resetQuiz: async () => {
+        set({
+            score: 0,
+            currentQuestionIndex: 0,
+            selectedAnswer: null,
+            isAnswered: false,
+            correctAnswers: [],
+            incorrectAnswers: [],
+            questions: [], 
+            isLoading: true,
+            error: null
         });
+    
+        await get().fetchQuizQuestions(); // ✅ Fetch new questions
     },
+    
 }));
