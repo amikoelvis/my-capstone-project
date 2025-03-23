@@ -3,13 +3,8 @@ import { useNavigate } from "react-router-dom";
 
 const Score = () => {
     const navigate = useNavigate();
-    const { score, questions, resetQuiz, correctAnswers, incorrectAnswers } = useQuizQuestionsStore();
+    const { score, questions, resetQuiz, resetQuizState, incorrectAnswers } = useQuizQuestionsStore();
     const totalQuestions = questions.length;
-
-    const handleRestart = () => {
-        resetQuiz();
-        navigate("/");
-    };
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
@@ -20,20 +15,31 @@ const Score = () => {
                 </p>
 
                 {incorrectAnswers.map((question, index) => (
-                <div key={index}>
-                <p><strong>Question:</strong> {question.question}</p>
-                <p><strong>Correct Answer:</strong> {question.correct_answer}</p>
-                <p><strong>Your Answer:</strong> {question.userAnswer || "Not Answered"}</p>
-                </div>
+                    <div key={index}>
+                        <p><strong>Question:</strong> {question.question}</p>
+                        <p><strong>Correct Answer:</strong> {question.correct_answer}</p>
+                        <p><strong>Your Answer:</strong> {question.userAnswer || "Not Answered"}</p>
+                    </div>
                 ))}
 
-
-
                 <button
-                    onClick={handleRestart}
+                    onClick={async () => {
+                        await resetQuiz();
+                        navigate("/quiz");
+                    }}
                     className="mt-6 px-6 py-2 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700"
                 >
-                    Retry Quiz
+                    Play Again
+                </button>
+
+                <button
+                    onClick={() => {
+                        resetQuizState(); // Reset without fetching
+                        navigate("/");    // Go to Home
+                    }}
+                    className="mt-6 ml-4 px-6 py-2 bg-green-600 text-white font-bold rounded-md hover:bg-green-700"
+                >
+                    Start New Quiz
                 </button>
             </div>
         </div>

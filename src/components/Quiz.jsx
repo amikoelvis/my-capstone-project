@@ -5,14 +5,11 @@ const Quiz = () => {
     const navigate = useNavigate();
     const {
         questions,
-        score,
         currentQuestionIndex,
         selectedAnswer,
         isAnswered,
-        updateScore,
         setSelectedAnswer,
-        nextQuestion,
-        resetQuiz
+        nextQuestion
     } = useQuizQuestionsStore();
 
     if (!questions.length) {
@@ -24,15 +21,10 @@ const Quiz = () => {
     const totalQuestions = questions.length;
 
     const handleAnswerSelection = (answer) => {
-        if (!isAnswered) {  
+        if (!isAnswered) {
             setSelectedAnswer(answer);
-    
-            if (answer === currentQuestion.correct_answer) {
-                updateScore();
-            }
         }
     };
-    
 
     const handleNextQuestion = () => {
         if (currentQuestionIndex < totalQuestions - 1) {
