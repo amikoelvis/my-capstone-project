@@ -1,9 +1,9 @@
 import { create } from "zustand";
 
-export const useQuizSettingsStore = create((set) => ({
+export const useQuizSettingsStore = create((set) => ({ 
     categories: [],
     selectedCategory: "9",
-    difficulty: "medium",
+    difficulty: "easy",
     numQuestions: "10",
     maxQuestions: "50",
     isLoadingCategories: false,
@@ -26,9 +26,9 @@ export const useQuizSettingsStore = create((set) => ({
                     set({ categories: data.trivia_categories });
                     break; // Success, exit loop
                 } else {
-                    throw new Error("No categories returned from API");
+                    throw new Error("No categories found!");
                 }
-            } catch (error) {
+            } catch {
                 retries++;
                 if (retries === maxRetries) {
                     set({
@@ -42,7 +42,7 @@ export const useQuizSettingsStore = create((set) => ({
         set({ isLoadingCategories: false });
     },
 
-    setSelectedCategory: (category) => set({ selectedCategory: category }),
+    setSelectedCategory: (category) => set({ selectedCategory: category }), 
 
     setDifficulty: (difficulty) => set({ difficulty }),
 
