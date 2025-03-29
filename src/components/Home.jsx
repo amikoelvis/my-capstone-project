@@ -51,8 +51,9 @@ const Home = () => {
     setNumQuestions(values.numQuestions);
     setStartingQuiz(true);
     await fetchQuizQuestions();
-    setStartingQuiz(false);
-    navigate("/quiz");
+    setTimeout(() => {
+      navigate("/quiz"); // Navigate to quiz after delay
+    }, 500); // 500ms delay for UX
   };
 
   return (
@@ -69,7 +70,7 @@ const Home = () => {
 
         <div className="w-full md:w-1/2 order-2 md:order-2">
           {isLoadingCategories ? (
-            <Loader message="Loading categories..." />
+            <Loader />
           ) : error ? (
             <div className="text-center">
               <Error message={error} />
@@ -179,7 +180,7 @@ const Home = () => {
                       isSubmitting ? "opacity-50" : "hover:bg-opacity-80"
                     } transition-all duration-300`}
                   >
-                    Start Quiz
+                    {isSubmitting ? "Quiz Starting..." : "Start Quiz"}
                   </button>
                 </Form>
               )}

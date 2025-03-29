@@ -72,7 +72,7 @@ const Quiz = () => {
     <div className="flex items-center justify-center min-h-screen bg-body p-4">
       <div className="w-full max-w-2xl p-6 bg-white rounded-lg shadow-lg text-center">
         {isLoading || isStartingQuiz || isLoadingCategories ? (
-          <Loader message={isStartingQuiz ? "Starting your quiz..." : "Loading your quiz..."} />
+          <Loader />
         ) : error ? (
           <div className="text-center">
             <Error message={error} />
