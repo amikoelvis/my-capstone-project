@@ -7,6 +7,7 @@ import Error from "./Error";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import Search from "./Search";
+import useCategoryFilter from "../hooks/useCategoryFilter";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -25,23 +26,12 @@ const Home = () => {
 
   const { fetchQuizQuestions, setStartingQuiz } = useQuizQuestionsStore();
 
-  const [filteredCategories, setFilteredCategories] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const filteredCategories = useCategoryFilter(categories, isLoadingCategories, searchQuery);
 
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
-
-  useEffect(() => {
-    if (categories.length > 0 && !isLoadingCategories) {
-      const filtered = searchQuery
-        ? categories.filter((category) =>
-            category.name.toLowerCase().includes(searchQuery.toLowerCase().trim())
-          )
-        : [];
-      setFilteredCategories(filtered);
-    }
-  }, [searchQuery, categories, isLoadingCategories]);
 
   const validationSchema = Yup.object({
     selectedCategory: Yup.string().required("Please select a category"),
@@ -96,105 +86,103 @@ const Home = () => {
                 selectedCategory: selectedCategory || "",
                 difficulty: difficulty || "easy",
                 numQuestions: numQuestions || 10,
-                searchQuery: "",
+                searchQuery: searchQuery, // Sync with component state
               }}
               validationSchema={validationSchema}
               onSubmit={handleStartQuiz}
             >
-              {({ values, setFieldValue, isSubmitting }) => {
-                // Sync Formik's searchQuery with component state
-                if (values.searchQuery !== searchQuery) {
-                  setSearchQuery(values.searchQuery);
-                }
+              {({ values, setFieldValue, isSubmitting }) => (
+                <Form className="w-full max-w-md space-y-4">
+                  <Search
+                    filteredCategories={filteredCategories}
+                    onCategorySelect={(categoryId) => {
+                      setFieldValue("selectedCategory", categoryId);
+                      setFieldValue("searchQuery", "");
+                      setSearchQuery(""); // Sync component state
+                    }}
+                    searchQuery={values.searchQuery}
+                    onSearchChange={(value) => {
+                      setFieldValue("searchQuery", value);
+                      setSearchQuery(value); // Sync component state
+                    }}
+                  />
 
-                return (
-                  <Form className="w-full max-w-md space-y-4">
-                    <Search
-                      filteredCategories={filteredCategories}
-                      onCategorySelect={(categoryId) => {
-                        setFieldValue("selectedCategory", categoryId);
-                        setFieldValue("searchQuery", "");
-                      }}
-                      searchQuery={values.searchQuery}
-                    />
-
-                    <div>
-                      <label
-                        htmlFor="selectedCategory"
-                        className="block mb-2 text-title font-bold font-Fran"
-                      >
-                        Topic:
-                      </label>
-                      <Field
-                        as="select"
-                        id="selectedCategory"
-                        name="selectedCategory"
-                        className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">Select Topic</option>
-                        {categories.map((cat) => (
-                          <option key={cat.id} value={cat.id}>
-                            {cat.name}
-                          </option>
-                        ))}
-                      </Field>
-                      <ErrorMessage
-                        name="selectedCategory"
-                        component="div"
-                        className="text-red-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="difficulty"
-                        className="block mb-2 text-title font-bold font-Fran"
-                      >
-                        Difficulty:
-                      </label>
-                      <Field
-                        as="select"
-                        id="difficulty"
-                        name="difficulty"
-                        className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="easy">Easy</option>
-                        <option value="medium">Medium</option>
-                        <option value="hard">Hard</option>
-                      </Field>
-                      <ErrorMessage name="difficulty" component="div" className="text-red-500" />
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="numQuestions"
-                        className="block mb-2 text-title font-bold font-Fran"
-                      >
-                        Number of Questions:
-                      </label>
-                      <Field
-                        type="number"
-                        id="numQuestions"
-                        name="numQuestions"
-                        className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        min="1"
-                        max="50"
-                      />
-                      <ErrorMessage name="numQuestions" component="div" className="text-red-500" />
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className={`w-full mt-4 p-2 text-white rounded-md bg-button ${
-                        isSubmitting ? "opacity-50" : "hover:bg-opacity-80"
-                      } transition-all duration-300`}
+                  <div>
+                    <label
+                      htmlFor="selectedCategory"
+                      className="block mb-2 text-title font-bold font-Fran"
                     >
-                      Start Quiz
-                    </button>
-                  </Form>
-                );
-              }}
+                      Topic:
+                    </label>
+                    <Field
+                      as="select"
+                      id="selectedCategory"
+                      name="selectedCategory"
+                      className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select Topic</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </Field>
+                    <ErrorMessage
+                      name="selectedCategory"
+                      component="div"
+                      className="text-red-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="difficulty"
+                      className="block mb-2 text-title font-bold font-Fran"
+                    >
+                      Difficulty:
+                    </label>
+                    <Field
+                      as="select"
+                      id="difficulty"
+                      name="difficulty"
+                      className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="easy">Easy</option>
+                      <option value="medium">Medium</option>
+                      <option value="hard">Hard</option>
+                    </Field>
+                    <ErrorMessage name="difficulty" component="div" className="text-red-500" />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="numQuestions"
+                      className="block mb-2 text-title font-bold font-Fran"
+                    >
+                      Number of Questions:
+                    </label>
+                    <Field
+                      type="number"
+                      id="numQuestions"
+                      name="numQuestions"
+                      className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      min="1"
+                      max="50"
+                    />
+                    <ErrorMessage name="numQuestions" component="div" className="text-red-500" />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`w-full mt-4 p-2 text-white rounded-md bg-button ${
+                      isSubmitting ? "opacity-50" : "hover:bg-opacity-80"
+                    } transition-all duration-300`}
+                  >
+                    Start Quiz
+                  </button>
+                </Form>
+              )}
             </Formik>
           )}
         </div>

@@ -1,6 +1,6 @@
 import { Field } from "formik";
 
-const Search = ({ filteredCategories, onCategorySelect, searchQuery }) => {
+const Search = ({ filteredCategories, onCategorySelect, searchQuery, onSearchChange }) => {
   return (
     <div className="mb-4">
       <label
@@ -15,6 +15,7 @@ const Search = ({ filteredCategories, onCategorySelect, searchQuery }) => {
         name="searchQuery"
         placeholder="Search for a topic..."
         className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        onChange={(e) => onSearchChange(e.target.value)}
       />
       {searchQuery && filteredCategories.length === 0 && (
         <p className="text-gray-700 mt-2 italic">
