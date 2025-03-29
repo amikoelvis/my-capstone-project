@@ -56,6 +56,12 @@ export const useQuizQuestionsStore = create((set, get) => ({
     set((state) => {
       const isCorrect = answer === state.questions[state.currentQuestionIndex].correct_answer;
       const currentQuestion = state.questions[state.currentQuestionIndex];
+      const answerLetters = ["A", "B", "C", "D"];
+      const correctAnswerIndex = currentQuestion.answers.indexOf(currentQuestion.correct_answer);
+      const userAnswerIndex = currentQuestion.answers.indexOf(answer);
+      const correctAnswerLetter = answerLetters[correctAnswerIndex];
+      const userAnswerLetter = answerLetters[userAnswerIndex];
+
       return {
         selectedAnswer: answer,
         isAnswered: true,
@@ -64,7 +70,15 @@ export const useQuizQuestionsStore = create((set, get) => ({
           ? [...state.correctAnswers, { ...currentQuestion, userAnswer: answer }]
           : state.correctAnswers,
         incorrectAnswers: !isCorrect
-          ? [...state.incorrectAnswers, { ...currentQuestion, userAnswer: answer }]
+          ? [
+              ...state.incorrectAnswers,
+              {
+                ...currentQuestion,
+                userAnswer: answer,
+                correctAnswerLetter, // Store correct answer letter
+                userAnswerLetter,   // Store user's answer letter
+              },
+            ]
           : state.incorrectAnswers,
       };
     });

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuizQuestionsStore } from "../store/quizQuestionsStore";
+import { FaCheck, FaTimes } from "react-icons/fa";
 import Loader from "./Loader";
 import Error from "./Error";
 
@@ -60,7 +61,7 @@ const Score = () => {
   });
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+    <div className="flex items-center justify-center min-h-screen bg-body p-4">
       <div className="w-full max-w-2xl p-6 bg-white rounded-lg shadow-lg text-center">
         {isLoadingResults || isStartingQuiz ? (
           <Loader /> // Show Loader when starting a new quiz or calculating results
@@ -82,31 +83,47 @@ const Score = () => {
             </p>
 
             {incorrectAnswersWithNumbers.length > 0 && (
-              <>
+              <div className="border rounded-md p-4">
                 <h3 className="text-xl font-semibold text-title mb-2">
                   Review Incorrect Answers
                 </h3>
                 {incorrectAnswersWithNumbers.map((question, index) => (
-                  <div key={index} className="mb-4 text-left">
+                  <div key={index} className="mb-4 text-center">
                     <p>
                       <strong>Question {question.questionNumber}:</strong>{" "}
                       <span dangerouslySetInnerHTML={{ __html: question.question }} />
                     </p>
-                    <p>
+                    <p className="flex justify-center items-center">
                       <strong>Correct Answer:</strong>{" "}
-                      <span dangerouslySetInnerHTML={{ __html: question.correct_answer }} />
+                      <span className="ml-2 mr-2 p-3 rounded-md text-white flex items-center">
+                        <span className="w-6 text-center bg-white text-black rounded-full h-6 flex items-center justify-center mr-2 border border-black">
+                          {question.correctAnswerLetter}
+                        </span>
+                        <span
+                          className="flex-1 text-center text-black"
+                          dangerouslySetInnerHTML={{ __html: question.correct_answer }}
+                        />
+                        <FaCheck className="ml-2 w-5 h-5 text-green-500" />
+                      </span>
                     </p>
-                    <p>
+                    <p className="flex justify-center items-center">
                       <strong>Your Answer:</strong>{" "}
-                      <span
-                        dangerouslySetInnerHTML={{
-                          __html: question.userAnswer || "Not Answered",
-                        }}
-                      />
+                      <span className="ml-2 mr-2 p-3 rounded-md text-white flex items-center">
+                        <span className="w-6 text-center bg-white text-black rounded-full h-6 flex items-center justify-center mr-2 border border-black">
+                          {question.userAnswerLetter}
+                        </span>
+                        <span
+                          className="flex-1 text-center text-black"
+                          dangerouslySetInnerHTML={{
+                            __html: question.userAnswer || "Not Answered",
+                          }}
+                        />
+                        <FaTimes className="ml-2 w-5 h-5 text-red-500" />
+                      </span>
                     </p>
                   </div>
                 ))}
-              </>
+              </div>
             )}
 
             <button
