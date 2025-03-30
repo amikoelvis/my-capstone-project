@@ -1,5 +1,7 @@
+// store/quizQuestionsStore.js
 import { create } from "zustand";
 import { useQuizSettingsStore } from "./quizSettingsStore";
+import { quizService } from "../services/quizService";
 
 export const useQuizQuestionsStore = create((set, get) => ({
   questions: [],
@@ -21,12 +23,15 @@ export const useQuizQuestionsStore = create((set, get) => ({
     let retries = 0;
     set({ isLoading: true, error: null, questions: [] });
     const { selectedCategory, numQuestions, difficulty } = useQuizSettingsStore.getState();
-    const apiUrl = `https://opentdb.com/api.php?amount=${numQuestions}&category=${selectedCategory}&difficulty=${difficulty}&type=multiple`;
 
     while (retries < maxRetries) {
       try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
+        const data = await quizService.getQuizQuestions(
+          numQuestions,
+          selectedCategory,
+          difficulty
+        );
+        
         if (data.results.length > 0) {
           const formattedQuestions = data.results.map((q) => ({
             ...q,
@@ -38,11 +43,11 @@ export const useQuizQuestionsStore = create((set, get) => ({
           set({ error: "No quiz questions available for this selection.", isLoading: false });
           return;
         }
-      } catch {
+      } catch (error) {
         retries++;
         if (retries === maxRetries) {
           set({
-            error: `Failed to load questions after ${maxRetries} attempts. Please check your network and try again.`,
+            error: `Failed to load questions after ${maxRetries} attempts: ${error.message}`,
             isLoading: false,
           });
         } else {
@@ -75,8 +80,8 @@ export const useQuizQuestionsStore = create((set, get) => ({
               {
                 ...currentQuestion,
                 userAnswer: answer,
-                correctAnswerLetter, // Store correct answer letter
-                userAnswerLetter,   // Store user's answer letter
+                correctAnswerLetter,
+                userAnswerLetter,
               },
             ]
           : state.incorrectAnswers,

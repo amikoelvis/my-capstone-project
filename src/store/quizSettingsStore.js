@@ -1,4 +1,6 @@
+// store/quizSettingsStore.js
 import { create } from "zustand";
+import { quizService } from "../services/quizService";
 
 export const useQuizSettingsStore = create((set) => ({ 
     categories: [],
@@ -17,25 +19,21 @@ export const useQuizSettingsStore = create((set) => ({
 
         while (retries < maxRetries) {
             try {
-                const response = await fetch("https://opentdb.com/api_category.php");
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                const data = await response.json();
+                const data = await quizService.getCategories();
                 if (data.trivia_categories) {
                     set({ categories: data.trivia_categories });
-                    break; // Success, exit loop
+                    break;
                 } else {
                     throw new Error("No categories found!");
                 }
-            } catch {
+            } catch (error) {
                 retries++;
                 if (retries === maxRetries) {
                     set({
-                        error: `Failed to load categories after ${maxRetries} attempts. Please check your network and try again.`,
+                        error: `Failed to load categories after ${maxRetries} attempts: ${error.message}`,
                     });
                 } else {
-                    await new Promise((resolve) => setTimeout(resolve, 1000 * retries)); // Exponential backoff: 1s, 2s, 3s
+                    await new Promise((resolve) => setTimeout(resolve, 1000 * retries));
                 }
             }
         }
@@ -43,9 +41,7 @@ export const useQuizSettingsStore = create((set) => ({
     },
 
     setSelectedCategory: (category) => set({ selectedCategory: category }), 
-
     setDifficulty: (difficulty) => set({ difficulty }),
-
     setNumQuestions: (num) =>
         set((state) => ({
             numQuestions: Math.max(1, Math.min(state.maxQuestions, Number(num))),
