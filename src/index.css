@@ -1,12 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-    --font-Mon: "Montserrat", "sans-serif";
-    --font-Fran: "Fraunces", "sans-serif";
-    --color-body: #f2ebe3;
-    --color-title: #1c232b;
-    --color-para: #6c7289;
+    --color-body: #EEEEEE;
+    --color-button-answer: #ECCBD9;
     --color-button: #3c8067;
-    --color-button-hover: #3c9444;
-    /* ... */
-  }
+    --color-button-hover: #1b4133;}
